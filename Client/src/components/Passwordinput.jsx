@@ -40,10 +40,6 @@ const RequirementIcon = ({ passed }) => (
   </span>
 );
 
-// A password field with a show/hide toggle, and an optional live checklist
-// of requirements (each with a label + a test function run against value).
-// Pass `requirements` only on the primary password field — leave it off
-// for a plain confirm-password field.
 const PasswordInput = ({ id, name, label, value, onChange, error, requirements, ...props }) => {
   const [visible, setVisible] = useState(false);
 
