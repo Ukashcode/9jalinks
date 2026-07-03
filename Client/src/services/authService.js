@@ -14,3 +14,13 @@ export const logoutUser = async () => {
   const { data } = await api.post('/auth/logout');
   return data;
 };
+
+export const verifyOtp = async ({ email, otp }) => {
+  const { data } = await api.post('/auth/verify-otp', { email, otp });
+  return data;
+};
+
+export const resendOtp = async (email) => {
+  const { data } = await api.post('/auth/resend-otp', { email });
+  return data;
+};

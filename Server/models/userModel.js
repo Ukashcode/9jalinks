@@ -27,11 +27,15 @@ export const findUserByUsername = async (username) => {
 export const findUserById = async (id) => {
   const [rows] = await pool.query(
     `SELECT id, full_name, username, email, profile_image, bio,
-            verification_status, created_at, updated_at
+            verification_status, email_verified, created_at, updated_at
      FROM users WHERE id = ? LIMIT 1`,
     [id]
   );
   return rows[0] || null;
+};
+
+export const markEmailVerified = async (id) => {
+  await pool.query('UPDATE users SET email_verified = TRUE WHERE id = ?', [id]);
 };
 
 // Builds the UPDATE query dynamically so we only touch the fields the

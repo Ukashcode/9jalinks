@@ -27,6 +27,10 @@ const Login = () => {
       login(res.data.user, res.data.token);
       navigate('/profile');
     } catch (err) {
+      if (err.response?.data?.data?.requiresVerification) {
+        navigate('/verify-otp', { state: { email: err.response.data.data.email } });
+        return;
+      }
       setError(err.response?.data?.message || 'Invalid email or password.');
     } finally {
       setLoading(false);

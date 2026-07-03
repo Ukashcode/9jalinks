@@ -47,6 +47,20 @@ export const loginRules = [
   body('password').notEmpty().withMessage('Password is required'),
 ];
 
+export const verifyOtpRules = [
+  body('email').trim().isEmail().withMessage('A valid email is required').normalizeEmail(),
+  body('otp')
+    .trim()
+    .isLength({ min: 6, max: 6 })
+    .withMessage('Code must be exactly 6 digits')
+    .isNumeric()
+    .withMessage('Code must contain only numbers'),
+];
+
+export const resendOtpRules = [
+  body('email').trim().isEmail().withMessage('A valid email is required').normalizeEmail(),
+];
+
 export const updateProfileRules = [
   body('full_name').optional().trim().notEmpty().withMessage('Full name cannot be empty'),
   body('username')

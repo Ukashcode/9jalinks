@@ -3,7 +3,6 @@ import { Link, useNavigate } from 'react-router-dom';
 import Input from '../components/Input.jsx';
 import PasswordInput from '../components/PasswordInput.jsx';
 import Button from '../components/Button.jsx';
-import useAuth from '../hooks/useAuth.js';
 import { registerUser } from '../services/authService.js';
 
 const INITIAL_FORM = {
@@ -25,7 +24,6 @@ const Signup = () => {
   const [form, setForm] = useState(INITIAL_FORM);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const { login } = useAuth();
   const navigate = useNavigate();
 
   const handleChange = (e) => {
@@ -38,9 +36,10 @@ const Signup = () => {
     setLoading(true);
 
     try {
-      const res = await registerUser(form);
-      login(res.data.user, res.data.token);
-      navigate('/profile');
+      await registerUser(form);
+      // Account is created but unverified — send the user to enter the
+      // OTP that was just emailed to them, instead of logging in now.
+      navigate('/verify-otp', { state: { email: form.email } });
     } catch (err) {
       setError(err.response?.data?.message || 'Something went wrong. Please try again.');
     } finally {
