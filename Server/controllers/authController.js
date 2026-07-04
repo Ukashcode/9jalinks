@@ -19,8 +19,23 @@ export const register = asyncHandler(async (req, res) => {
   const { fullName, username, email, password } = req.body;
 
   const existingEmail = await findUserByEmail(email);
+
   if (existingEmail) {
-    return res.status(409).json({ success: false, message: 'Email is already registered' });
+    // If the account is already verified, this really is a duplicate.
+    if (existingEmail.email_verified) {
+      return res.status(409).json({ success: false, message: 'Email is already registered' });
+    }
+
+    // If it exists but was never verified — most likely because a
+    // previous signup attempt succeeded in creating the user but failed
+    // to send the OTP email — don't block them. Just send a fresh OTP
+    // so they can complete verification instead of being stuck forever.
+    await issueOtp(existingEmail);
+    return res.status(200).json({
+      success: true,
+      message: 'This email is already registered but not verified. A new code has been sent.',
+      data: { email: existingEmail.email },
+    });
   }
 
   const existingUsername = await findUserByUsername(username);
