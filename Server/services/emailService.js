@@ -3,6 +3,10 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
+// Reusable SMTP transporter, created once and reused across every send —
+// Nodemailer pools the connection instead of reconnecting per email.
+// Explicit timeouts prevent a hung connection from blocking the request
+// indefinitely, and surface a clear error instead of an ambiguous hang.
 const transporter = nodemailer.createTransport({
   host: process.env.SMTP_HOST,
   port: Number(process.env.SMTP_PORT) || 587,
@@ -11,8 +15,14 @@ const transporter = nodemailer.createTransport({
     user: process.env.SMTP_USER,
     pass: process.env.SMTP_PASS,
   },
+  connectionTimeout: 15000, // time to establish the TCP connection
+  greetingTimeout: 15000, // time to wait for the SMTP server's greeting
+  socketTimeout: 20000, // time to wait for any response once connected
 });
 
+// Sends the OTP email. Kept as its own function (rather than inline in
+// the controller) so the actual email template/provider can change later
+// without touching any auth logic.
 export const sendOtpEmail = async ({ to, fullName, otp }) => {
   const expiryMinutes = process.env.OTP_EXPIRY_MINUTES || 5;
 
@@ -40,6 +50,7 @@ export const sendOtpEmail = async ({ to, fullName, otp }) => {
       `,
     });
   } catch (error) {
+    console.error('SMTP send error — code:', error.code, '| command:', error.command);
     throw new Error(`Failed to send OTP email: ${error.message}`);
   }
 };
